@@ -48,7 +48,7 @@ init: ## install python virtual env and required development packages
 .PHONY: lint
 lint: lint-py lint-shell
 
-.PHONY: lint-p<
+.PHONY: lint-py
 lint-py: ## lint python code
 	ruff check $(PY_FILES_DIRS)
 
