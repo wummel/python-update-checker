@@ -16,7 +16,9 @@ MAKEFLAGS += --no-builtin-rules
 
 
 ############ Configuration ############
-VERSION:=$(shell grep "version" pyproject.toml | cut -d '"' -f2)
+PROJECT:=$(shell egrep "name[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
+VERSION:=$(shell egrep "version[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
+
 # Pytest options:
 # --full-trace: print full stacktrace on errors
 PYTESTOPTS?=--full-trace
@@ -26,6 +28,23 @@ TESTS ?= tests/
 TESTOPTS=
 # python files and directories
 PY_FILES_DIRS:=pcu tests
+
+# Release configuration
+RELEASE_NAME:=$(PROJECT)-$(VERSION)
+RELEASE_SOURCE:=$(RELEASE_NAME).tar.xz
+RELEASE_BRANCH:=main
+RELEASE_TAG:=$(VERSION)
+RELEASE_FILES:=\
+  scripts \
+  tests \
+  .gitignore \
+  .ruff.toml \
+  COPYING \
+  Makefile \
+  pcu \
+  pyproject.toml \
+  README.md
+
 
 ############ Default target ############
 
@@ -104,3 +123,57 @@ test: ## run tests
 .PHONY: typecheck
 typecheck:	## run the ty type checker
 	ty check $(PY_FILES_DIRS)
+
+
+############ Release  ############
+
+.PHONY: distclean
+distclean:
+	rm -rf dist tests/__pycache__
+
+# Releases are tagged with the version, ie. "0.5"
+.PHONY: release
+release: distclean checkrelease	## create release
+	if [ ! -f dist/$(RELEASE_SOURCE) ]; then \
+	  mkdir -p dist; \
+	  git checkout tags/$(RELEASE_TAG) && \
+	  tar \
+	    --sort=name \
+		--mtime='$(shell git log -1 --pretty=%cI)' \
+		--owner=0 --group=0 --numeric-owner \
+		--pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
+		--xz \
+		--create \
+		--file dist/$(RELEASE_SOURCE) $(RELEASE_FILES) && \
+	  echo "Released dist/$(RELEASE_SOURCE)"; \
+	fi
+
+.PHONY: release-pypi
+release-pypi: ## upload a new release to pypi
+	uv publish dist/$(RELEASE_SOURCE)
+
+.PHONY: checkrelease
+checkrelease: lint test typecheck checkgit	## check release conditions
+
+.PHONY: checkgit
+checkgit:	## various git release checks
+# check that the current branch is the release branch
+	@if [ "$(shell git rev-parse --abbrev-ref HEAD)" != "$(RELEASE_BRANCH)" ]; then \
+	  echo "ERROR: current branch is not '$(RELEASE_BRANCH)', but '$(shell git rev-parse --abbrev-ref HEAD;)'"; \
+	  false; \
+	fi
+# check for uncommitted versions
+	@if [ -n "$(shell git status --porcelain --untracked-files=all)" ]; then \
+	  echo "ERROR: uncommitted changes"; \
+	  git status --porcelain --untracked-files=all; \
+	  false; \
+	fi
+# check that release tag exists
+	@if [ -z "$(shell git tag -l -- $(RELEASE_TAG))" ]; then \
+	  echo "ERROR: git tag \"$(RELEASE_TAG)\" does not exist, execute 'git tag -a $(RELEASE_TAG) -m \"$(RELEASE_TAG)\"'"; \
+	  false; \
+	fi
+# check that release tags is pushed to remote
+	@if ! git ls-remote --exit-code --tags origin $(RELEASE_TAG); then \
+	  echo "ERROR: git tag \"$(RELEASE_TAG)\" does not exist on remote repo, execute 'git push --tags'"; \
+	fi
