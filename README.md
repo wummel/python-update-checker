@@ -79,6 +79,6 @@ Limitations
 * No library api is available, only the pcu command line interface as a single script.
 * Pcu only supports environment markers `os_name`, `sys_platform` with `==` operator.
 * References (`-r`) inside requirements.txt are not supported.  
-  You can provide all requirements.txt files as arguments to pcu instead.
+  You can provide multiple requirements.txt files as arguments to pcu instead.
 * Constraint references (`-c`) inside requirements.txt are not supported.  
   Use the `--constraints` option from pcu instead.
