@@ -153,6 +153,23 @@ release: distclean checkrelease	## create release
 release-pypi: ## upload a new release to pypi
 	uv publish dist/$(RELEASE_SOURCE)
 
+# export GITHUB_TOKEN for the gh command
+# Generate a fine grained access token with:
+# - Restricted to this repository
+# - Repository permission: Metadata -> Read (displayed as "Read access to metadata" in token view)
+# - Repository permission: Contents -> Read and write (displayed as "Read and Write access to code" in token view)
+# - Expiration in 90 days
+# After that run "export GITHUB_TOKEN=<token-content>"
+.PHONY: release-gh
+release-gh:	## upload a new release to github
+	gh release create \
+	  --title "Release $(RELEASE_TAG)" \
+	  --latest \
+	  --draft=false \
+	  --prerelease=false \
+	  --verify-tag "$(RELEASE_TAG)" \
+	  dist/$(RELEASE_SOURCE)
+
 .PHONY: checkrelease
 checkrelease: lint test typecheck checkgit	## check release conditions
 
