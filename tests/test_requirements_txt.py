@@ -36,6 +36,7 @@ class RequirementsTxtTest(unittest.TestCase):
         self.assertIn("update 'argcomplete==", output)
         self.assertIn("update 'ty== ", output)
         self.assertIn("update 'ruff ==", output)
+        self.assertIn("update 'pywin32==", output)
 
     @needs_program('uv')
     def test_requirements_check_package(self):
@@ -49,6 +50,7 @@ class RequirementsTxtTest(unittest.TestCase):
         self.assertNotIn("update 'argcomplete==", output)
         self.assertIn("update 'ty== ", output)
         self.assertNotIn("update 'ruff ==", output)
+        self.assertNotIn("update 'pywin32==", output)
 
     @needs_program('uv')
     def test_requirements_update(self):
@@ -59,7 +61,7 @@ class RequirementsTxtTest(unittest.TestCase):
         shutil.copy(origfile, tmpdir)
         try:
             filename = os.path.join(tmpdir, "requirements.txt")
-            packagedeps = ("argcomplete==3.6.1", "ty== 0.0.29", "ruff ==0.15.9")
+            packagedeps = ("argcomplete==3.6.1", "ty== 0.0.29", "ruff ==0.15.9", "pywin32==310")
             with open(filename) as f:
                 content = f.read()
                 for dep in packagedeps:
@@ -71,6 +73,7 @@ class RequirementsTxtTest(unittest.TestCase):
             self.assertIn("update 'argcomplete==", output)
             self.assertIn("update 'ty== ", output)
             self.assertIn("update 'ruff ==", output)
+            self.assertIn("update 'pywin32==", output)
             # check that old package versions have been updated
             with open(filename) as f:
                 content = f.read()

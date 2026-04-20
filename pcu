@@ -231,6 +231,28 @@ def handle_pyproject_toml(
 comparator_pattern = r"(===|==|<=|>=|~=|!=|<|>)"
 
 
+def check_requirement(pkg_req: Requirement) -> Requirement | None:
+    """Check if requirement is pinned, else log and return None."""
+    if pkg_req.url:
+        logger.info(f"skip URL-pinned package dependency '{pkg_req}'")
+        return None
+    if len(pkg_req.specifier) < 1:
+        logger.info(f"skip non-versioned dependency '{pkg_req}'")
+        return None
+    if len(pkg_req.specifier) > 1:
+        logger.info(f"skip multi-versioned dependency '{pkg_req}'")
+        return None
+    for spec in pkg_req.specifier:
+        if spec.operator != '==':
+            logger.info(f"skip unpinned dependency '{pkg_req}'")
+            return None
+        if "*" in spec.version:
+            logger.info(f"skip unpinned *-patterned version dependency '{pkg_req}'")
+            return None
+        return pkg_req
+    return None
+
+
 def update_pyproject_dependencies(
     dependencies: list[str],
     project_dir: str,
@@ -246,84 +268,50 @@ def update_pyproject_dependencies(
     """Update given dependency list of a pyproject.toml file."""
     updatable = 0
     for dep in dependencies:
-        # remove optional marker
-        dep_no_marker = re.sub(r"\s*;.*$", "", dep)
-
-        # check for "django @ URL" pinned dependencies
-        if "@" in dep_no_marker:
-            logger.info(f"skip URL-pinned package dependency {dep!r}")
+        try:
+            pkg_req = Requirement(dep)
+        except Exception as exc:
+            logger.debug(f"error parsing exception: {exc}")
+            logger.info(f"skip unsupported dependency {dep!r}")
             continue
-        # check for "django>=5,<6" multi-versioned dependencies
-        if "," in dep_no_marker:
-            logger.info(f"skip multi-versioned dependency {dep!r}")
+        if check_requirement(pkg_req) is None:
             continue
-
-        if re.search(comparator_pattern, dep_no_marker):
-            package, comparator, version = re.split(
-                comparator_pattern, dep_no_marker, maxsplit=1
-            )
-            package = package.strip()
-            version = version.strip()
-        else:
-            package = dep_no_marker
-            version = None
-
-        # remove package extras for comparisons
-        package_no_extra = re.sub(r"\[[^\]]+\]$", "", package)
-
         # check for project dependency
-        if package_no_extra == projectname:
+        if pkg_req.name == projectname:
             logger.info(f"skip project name dependency {dep!r}")
             continue
 
-        # check for non-versioned dependency
-        if not version:
-            msg = f"skip non-versioned dependency {dep!r}"
-            try:
-                latest_version = get_latest_version(
-                    dep_no_marker,
-                    exclude_newer=exclude_newer,
-                    constraint_file=constraint_file,
-                )
-                msg += f", pin latest version with '{dep_no_marker}=={latest_version}'"
-            except Exception:
-                pass
-            logger.info(msg)
-            continue
-
-        # check for unpinned dependency
-        if comparator != "==":
-            msg = f"skip unpinned dependency {dep!r}"
-            if group:
-                msg += " in group {group}"
-            logger.info(msg)
-            continue
-        # skip unpinned "django==5.*" wildcard versions
-        if version and "*" in version:
-            logger.info(f"skip unpinned wildcard version dependency {dep!r}")
-            continue
         # respect optional package filter
-        if packages and package_no_extra not in packages:
+        if packages and pkg_req.name not in packages:
             continue
+        python_platform = None
+        if pkg_req.marker:
+            markerlist = pkg_req.marker._markers
+            os_name = get_marker_value(markerlist, "os_name")
+            if os_name:
+                python_platform = get_python_platform(os_name=os_name)
+            sys_platform = get_marker_value(markerlist, "sys_platform")
+            if sys_platform:
+                python_platform = get_python_platform(sys_platform=sys_platform)
         try:
             latest_version = get_latest_version(
-                package_no_extra,
+                pkg_req.name,
                 exclude_newer=exclude_newer,
                 constraint_file=constraint_file,
+                python_platform=python_platform,
             )
         except Exception as exc:
             # error getting latest version
-            logger.warning(
-                f"error getting latest version for {package_no_extra!r}: {exc}"
-            )
+            logger.warning(f"error getting latest version for '{pkg_req}': {exc}")
             latest_version = None
-        if latest_version is not None and latest_version != version:
+        spec = next(s for s in pkg_req.specifier)
+        if latest_version is not None and latest_version != spec.version:
             logger.warning(
-                f"update '{dep}' --> {colorize_updated_version(version, latest_version) if color else latest_version}"
+                f"update '{dep}' --> {colorize_updated_version(spec.version, latest_version) if color else latest_version}"
             )
             updatable += 1
             if command == "update":
-                newdep = dep.replace(version, latest_version, 1)
+                newdep = dep.replace(spec.version, latest_version, 1)
                 update_pyproject_pkg(
                     newdep, project_dir, group=group, optional=optional
                 )
@@ -455,7 +443,6 @@ def handle_requirements_txt(
             if req is None:
                 output.write(line)
             else:
-                spec = next(s for s in req.specifier)
                 if req.marker:
                     markerlist = req.marker._markers
                     os_name = get_marker_value(markerlist, "os_name")
@@ -477,6 +464,7 @@ def handle_requirements_txt(
                         f"error getting latest version for {req.name!r}: {exc}"
                     )
                     latest_version = None
+                spec = next(s for s in req.specifier)
                 if packages and req.name not in packages:
                     output.write(line)
                 elif latest_version is not None and latest_version != spec.version:
@@ -549,6 +537,7 @@ def get_option_parser() -> argparse.ArgumentParser:
 
 def main(args: list[str]) -> int:
     """Parse options and check or update dependencies."""
+    # parse options
     try:
         optargs = get_option_parser().parse_args(args)
     except argparse.ArgumentError as exc:
@@ -560,6 +549,7 @@ def main(args: list[str]) -> int:
     remove_constraint_file = False
     constraints = optargs.constraints
     constraint_file = None
+    # if constraints is a string write it in a temporary constraint file
     if constraints:
         if os.path.isfile(constraints):
             constraint_file = constraints
@@ -570,6 +560,7 @@ def main(args: list[str]) -> int:
             with open(constraint_file, "w") as f:
                 f.write(constraints)
             remove_constraint_file = True
+    # handle all given dependency files
     try:
         for dep_file in optargs.dep_files:
             if not os.path.isfile(dep_file):
@@ -577,6 +568,7 @@ def main(args: list[str]) -> int:
                 usage()
             logger.info(f"handling {dep_file}")
             if str(dep_file).lower().endswith(".toml"):
+                # pyproject.toml
                 updatable = handle_pyproject_toml(
                     dep_file,
                     packages=optargs.packages,
@@ -586,6 +578,7 @@ def main(args: list[str]) -> int:
                     color=optargs.color,
                 )
             else:
+                # assume requirements.txt format
                 updatable = handle_requirements_txt(
                     dep_file,
                     packages=optargs.packages,
@@ -598,6 +591,7 @@ def main(args: list[str]) -> int:
         if remove_constraint_file and constraint_file:
             os.unlink(constraint_file)
     if optargs.command == "check":
+        # check return non-zero exit code when updates are available
         return updatable
     return 0
 
