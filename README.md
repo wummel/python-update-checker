@@ -1,6 +1,6 @@
 python-check-updates
 =====================
-Python-check-updates updates pinned dependencies in `pyproject.toml` or
+Python-check-updates (pcu) updates pinned dependencies in `pyproject.toml` or
 `requirements.txt` to the latest versions.  
 Pinning dependencies is an important part for [reproducible builds](https://en.wikipedia.org/wiki/Reproducible_builds).
 
@@ -48,12 +48,18 @@ the transitive dependencies in `uv.lock`.
 Installation
 -------------
 
-1) Install python uv (https://docs.astral.sh/uv/getting-started/installation/)
-2) For Linux and MacOS:
-   
+1) Install [python uv](https://docs.astral.sh/uv/getting-started/installation/)
+2) Copy the [pcu](https://raw.githubusercontent.com/wummel/python-check-updates/refs/heads/main/pcu) script into a PATH directory.
+
+Example for Linux and MacOS:
+
    ```bash
+   # create directory
    mkdir -p ~/.local/bin
-   cp pcu ~/.local/bin
+   # download pcu
+   curl https://raw.githubusercontent.com/wummel/python-check-updates/refs/heads/main/pcu > ~/.local/bin/pcu
+   chmod 0755 ~/.local/bin/pcu
+   # add directory to PATH
    export PATH=$PATH:~/.local/bin
    ```
 
@@ -73,16 +79,16 @@ Dependencies are
 
 Pcu needs Python >= 3.11 since it uses the tomllib Python module.
 
-Pcu consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.
+Pcu consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.  
+This enables easy packaging and installation.
 
 
 Limitations
 ------------
 
-* No library api is available, only the pcu command line interface as a single script.
+* No library api is available, only the `pcu` command line interface.
 * No support for custom dependency formats in pyproject.toml
   (eg. `[tool.poetry.dependencies]`).
-* Pcu only supports environment markers `os_name` and `sys_platform` with `==` operator.
-  All other environment markers are ignored.
+* Pcu has limited support for environment markers.
 * Constraint references (`-c`) inside requirements.txt are not supported.  
   Use the `--constraints` option instead.
