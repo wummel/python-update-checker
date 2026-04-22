@@ -26,7 +26,7 @@ dev = [
   # for python code linting
   "ruff==0.15.10",
   # for python type checking
-  "ty==0.0.30",
+  "ty==0.0.31",
   # for testing
   "pytest==9.0.3",
 ]
