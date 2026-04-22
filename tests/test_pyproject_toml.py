@@ -79,6 +79,7 @@ class PyprojectTomlTest(unittest.TestCase):
             self.assertIn("update 'ty== ", output)
             self.assertIn("update 'ruff ==", output)
             self.assertIn("update 'tensorflow==", output)
+            self.assertIn("skip include-group dependency", output)
             # check that old package versions have been updated
             with open(filename) as f:
                 content = f.read()

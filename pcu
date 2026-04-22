@@ -279,7 +279,7 @@ def get_min_python_version_from_req(pkg_req: Requirement) -> str | None:
 
 
 def update_pyproject_dependencies(
-    dependencies: list[str],
+    dependencies: list[str | dict],
     project_dir: str,
     projectname: str,
     group: None | str = None,
@@ -293,6 +293,9 @@ def update_pyproject_dependencies(
     """Update given dependency list of a pyproject.toml file."""
     updatable = 0
     for dep in dependencies:
+        if isinstance(dep, dict):
+            logger.info(f"skip include-group dependency {dep!r} in group {group}")
+            continue
         try:
             pkg_req = Requirement(dep)
         except Exception as exc:
@@ -403,20 +406,7 @@ def parse_requirement(
         logger.info(f"skip URL-pinned package dependency '{pkg_req}'")
         return None
     if len(pkg_req.specifier) < 1:
-        msg = f"skip non-versioned dependency '{pkg_req}'"
-        try:
-            latest_version = get_latest_version(
-                pkg_req.name,
-                exclude_newer=exclude_newer,
-                constraint_file=constraint_file,
-            )
-            msg += f", pin latest version with '{pkg_req.name}=={latest_version}'"
-        except subprocess.CalledProcessError as exc:
-            # error getting latest version
-            err = f"{exc}, output={exc.output}, stderr={exc.stderr}"
-            logger.warning(f"error getting latest version for '{pkg_req}': {err}")
-            latest_version = None
-        logger.info(msg)
+        logger.info(f"skip non-versioned dependency '{pkg_req}'")
         return None
     if len(pkg_req.specifier) > 1:
         logger.info(f"skip multi-versioned dependency '{pkg_req}'")

@@ -36,3 +36,7 @@ dev = [
   # project dependency
   "test",
 ]
+
+env_dev = [
+  {include-group = "dev"},
+]
