@@ -7,6 +7,9 @@ dependencies = [
   "argcomplete==3.6.1",
   # windows only, using environment marker
   "pywin32==310; os_name=='nt'",
+  # arbitrary equality
+  "certifi===2026.1.4",
+
   # unpinned
   "requests",
   # loose pinned

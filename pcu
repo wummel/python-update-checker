@@ -252,7 +252,7 @@ def check_requirement(pkg_req: Requirement) -> Requirement | None:
         logger.info(f"skip multi-versioned dependency '{pkg_req}'")
         return None
     for spec in pkg_req.specifier:
-        if spec.operator != '==':
+        if spec.operator not in ('==', '==='):
             logger.info(f"skip unpinned dependency '{pkg_req}'")
             return None
         if "*" in spec.version:
@@ -405,24 +405,7 @@ def parse_requirement(
         logger.debug(f"error parsing exception: {exc}")
         logger.info(f"skip unsupported dependency {line!r}")
         return None
-    if pkg_req.url:
-        logger.info(f"skip URL-pinned package dependency '{pkg_req}'")
-        return None
-    if len(pkg_req.specifier) < 1:
-        logger.info(f"skip non-versioned dependency '{pkg_req}'")
-        return None
-    if len(pkg_req.specifier) > 1:
-        logger.info(f"skip multi-versioned dependency '{pkg_req}'")
-        return None
-    for spec in pkg_req.specifier:
-        if spec.operator != '==':
-            logger.info(f"skip unpinned dependency '{pkg_req}'")
-            return None
-        if "*" in spec.version:
-            logger.info(f"skip unpinned *-patterned version dependency '{pkg_req}'")
-            return None
-        return pkg_req
-    return None
+    return check_requirement(pkg_req)
 
 
 def get_marker_value(
@@ -460,7 +443,7 @@ def handle_requirements_txt(
     constraint_file: None | str = None,
     color: bool = True,
     rec_level: int = 0,
-    handled_files=None,
+    handled_files: list[str] | None = None,
 ) -> int:
     """Check or update pinned dependencies of a requirements.txt file."""
     msg = f"handling requirements file {requirements_txt_path}"
@@ -523,8 +506,8 @@ def handle_requirements_txt(
                     )
                     output.write(
                         re.sub(
-                            rf"==(\s*){re.escape(spec.version)}",
-                            rf"==\g<1>{latest_version}",
+                            rf"(===?\s*){re.escape(spec.version)}",
+                            rf"\g<1>{latest_version}",
                             line,
                             count=1,
                         )
@@ -588,7 +571,7 @@ def get_option_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def handle_dependency_file(dep_file, optargs, constraint_file):
+def handle_dependency_file(dep_file: str, optargs, constraint_file):
     """Check a dependency file for updates."""
     if not os.path.isfile(dep_file):
         usage(f"file {dep_file} not found or not a regular file")

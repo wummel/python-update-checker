@@ -4,6 +4,8 @@ argcomplete==3.6.1
 ruff ==0.15.9
 # windows only, using environment marker
 pywin32==310; os_name=='nt'
+# arbitrary equality
+certifi===2026.1.4
 
 # unpinned
 requests

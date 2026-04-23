@@ -37,6 +37,7 @@ class RequirementsTxtTest(unittest.TestCase):
         self.assertIn("update 'ty== ", output)
         self.assertIn("update 'ruff ==", output)
         self.assertIn("update 'pywin32==", output)
+        self.assertIn("update 'certifi===", output)
 
     @needs_program('uv')
     def test_requirements_check_package(self):
@@ -51,6 +52,7 @@ class RequirementsTxtTest(unittest.TestCase):
         self.assertIn("update 'ty== ", output)
         self.assertNotIn("update 'ruff ==", output)
         self.assertNotIn("update 'pywin32==", output)
+        self.assertNotIn("update 'certifi===", output)
 
     @needs_program('uv')
     def test_requirements_update(self):
@@ -67,6 +69,7 @@ class RequirementsTxtTest(unittest.TestCase):
                 "argcomplete==3.6.1",
                 "ruff ==0.15.9",
                 "pywin32==310",
+                "certifi===2026.1.4",
             )
             with open(filename) as f:
                 content = f.read()
@@ -79,6 +82,7 @@ class RequirementsTxtTest(unittest.TestCase):
             self.assertIn("update 'argcomplete==", output)
             self.assertIn("update 'ruff ==", output)
             self.assertIn("update 'pywin32==", output)
+            self.assertIn("update 'certifi===", output)
             # from other-requirements.txt
             self.assertIn("update 'ty== ", output)
             # check that old package versions have been updated

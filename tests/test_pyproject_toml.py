@@ -37,6 +37,7 @@ class PyprojectTomlTest(unittest.TestCase):
         self.assertIn("update 'ty== ", output)
         self.assertIn("update 'ruff ==", output)
         self.assertIn("update 'tensorflow==", output)
+        self.assertIn("update 'certifi===", output)
 
     @needs_program('uv')
     def test_pyproject_check_package(self):
@@ -51,6 +52,7 @@ class PyprojectTomlTest(unittest.TestCase):
         self.assertIn("update 'ty== ", output)
         self.assertNotIn("update 'ruff ==", output)
         self.assertNotIn("update 'tensorflow==", output)
+        self.assertNotIn("update 'certifi===", output)
 
     @needs_program('uv')
     def test_pyproject_update(self):
@@ -66,6 +68,7 @@ class PyprojectTomlTest(unittest.TestCase):
                 "ty== 0.0.29",
                 "ruff ==0.15.9",
                 "tensorflow==2.14.0",
+                "certifi===2026.1.4",
             )
             with open(filename) as f:
                 content = f.read()
@@ -79,6 +82,7 @@ class PyprojectTomlTest(unittest.TestCase):
             self.assertIn("update 'ty== ", output)
             self.assertIn("update 'ruff ==", output)
             self.assertIn("update 'tensorflow==", output)
+            self.assertIn("update 'certifi===", output)
             self.assertIn("skip include-group dependency", output)
             # check that old package versions have been updated
             with open(filename) as f:
