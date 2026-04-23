@@ -24,20 +24,33 @@ Examples
 ---------
 
 ```bash
-# check all pinned packages for updates in requirements.txt
-pcu check requirements.txt
+$ # check all pinned packages for updates in pyproject.toml
+$ pcu check pyproject.toml
+INFO: handling pyproject file pyproject.toml
+WARNING: update 'ty==0.0.29' --> 0.0.32
 
-# check all pinned packages for updates in several requirements.txt-style files
-pcu check requirements/*.in
+$ # update all pinned packages in pyproject.toml
+$ # limit updates to versions that are at least 7 days old
+$ pcu --exclude-newer="7 days" update pyproject.toml
+INFO: handling pyproject file pyproject.toml
+WARNING: update 'ty==0.0.29' --> 0.0.31
+INFO: Wrote 1 updated package versions to pyproject.toml
 
-# update all pinned packages in pyproject.toml
-# limit updates to versions that are at least 10 days old
-pcu --exclude-newer="10 days" update pyproject.toml
+$ # check all pinned packages for updates in requirements.txt
+$ pcu check requirements.txt
+INFO: handling requirements file requirements.txt
+WARNING: update 'argcomplete==3.6.1' --> 3.6.3
+WARNING: update 'Django==5.2.0' --> 6.0.4
 
-# update only the django package version in pyproject.toml
-# limit updates to django versions less than 6
-pcu --package="django" --constraints="django<6" update pyproject.toml
+$ # update only the django package version in requirements.txt
+$ # limit updates to django versions less than 6
+$ pcu --package="Django" --constraints="Django<6" update requirements.txt
+INFO: handling requirements file requirements.txt
+WARNING: update 'Django==5.2.0' --> 5.2.13
+INFO: Wrote 1 updated package versions to requirements.txt
 ```
+
+The exit code of `pcu check` is non-zero when updates are available.
 
 If your project relies on a [project directory](https://docs.astral.sh/uv/concepts/projects/layout/) (for example to define additional packages index in pyproject.toml), run `pcu` from your project root directory.
 
@@ -80,7 +93,7 @@ Dependencies are
 Pcu needs Python >= 3.11 since it uses the tomllib Python module.
 
 Pcu consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.  
-This enables easy packaging and installation.
+This enables simple packaging and installation.
 
 
 Limitations
