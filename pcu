@@ -22,6 +22,7 @@ import os
 import tempfile
 from packaging.requirements import Requirement
 from packaging.markers import Variable, MarkerList
+from packaging.utils import canonicalize_name
 
 
 def usage(msg: str | None = None) -> None:
@@ -176,7 +177,7 @@ def handle_pyproject_toml(
     Specification: https://packaging.python.org/en/latest/specifications/pyproject-toml/
     Friendly guide: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
     """
-    logger.info(f"handling pyproject {pyproject_path}")
+    logger.info(f"handling pyproject file {pyproject_path}")
     updatable = 0
     project_dir = os.path.abspath(os.path.dirname(pyproject_path))
     # parse pyproject.toml
@@ -230,6 +231,8 @@ def handle_pyproject_toml(
                 constraint_file=constraint_file,
                 color=color,
             )
+    if command == "update" and updatable > 0:
+        logger.info(f"Wrote {updatable} updated package versions to {pyproject_path}")
     return updatable
 
 
@@ -310,7 +313,7 @@ def update_pyproject_dependencies(
             continue
 
         # respect optional package filter
-        if packages and pkg_req.name not in packages:
+        if packages and canonicalize_name(pkg_req.name) not in packages:
             continue
         try:
             latest_version = get_latest_version(
@@ -460,7 +463,7 @@ def handle_requirements_txt(
     handled_files=None,
 ) -> int:
     """Check or update pinned dependencies of a requirements.txt file."""
-    msg = f"handling requirements {requirements_txt_path}"
+    msg = f"handling requirements file {requirements_txt_path}"
     if rec_level > 0:
         msg += f", recursion level {rec_level}"
     logger.info(msg)
@@ -512,7 +515,7 @@ def handle_requirements_txt(
                     )
                     latest_version = None
                 spec = next(s for s in pkg_req.specifier)
-                if packages and pkg_req.name not in packages:
+                if packages and canonicalize_name(pkg_req.name) not in packages:
                     output.write(line)
                 elif latest_version is not None and latest_version != spec.version:
                     logger.warning(
@@ -529,9 +532,12 @@ def handle_requirements_txt(
                     updatable += 1
                 else:
                     output.write(line)
-    if command == "update":
+    if command == "update" and updatable > 0:
         with open(requirements_txt_path, "w") as f:
             f.write(output.getvalue())
+        logger.info(
+            "Wrote {updatable} updated package versions to {requirements_txt_path}"
+        )
     return updatable
 
 
@@ -583,27 +589,32 @@ def get_option_parser() -> argparse.ArgumentParser:
 
 
 def handle_dependency_file(dep_file, optargs, constraint_file):
-    """Check a dependency file file updates."""
+    """Check a dependency file for updates."""
     if not os.path.isfile(dep_file):
-        usage(f"path {dep_file} not found")
+        usage(f"file {dep_file} not found or not a regular file")
     # limit to 1MB to prevent denial-of-service
     if os.stat(dep_file).st_size > 1024 * 1014:
-        usage(f"path {dep_file} is >1 MB")
-    if str(dep_file).lower().endswith(".toml"):
+        usage(f"file {dep_file} is >1 MB")
+    dep_file_normalized = os.path.basename(dep_file).lower()
+    if optargs.packages:
+        packages = [canonicalize_name(name) for name in optargs.packages]
+    else:
+        packages = None
+    if dep_file_normalized == "pyproject.toml":
         # pyproject.toml format
         updatable = handle_pyproject_toml(
             dep_file,
-            packages=optargs.packages,
+            packages=packages,
             command=optargs.command,
             exclude_newer=optargs.exclude_newer,
             constraint_file=constraint_file,
             color=optargs.color,
         )
-    elif str(dep_file).lower().endswith((".txt", ".in")):
+    elif dep_file_normalized.endswith((".txt", ".in")):
         # requirements.txt format
         updatable = handle_requirements_txt(
             dep_file,
-            packages=optargs.packages,
+            packages=packages,
             command=optargs.command,
             exclude_newer=optargs.exclude_newer,
             constraint_file=constraint_file,
@@ -611,7 +622,7 @@ def handle_dependency_file(dep_file, optargs, constraint_file):
         )
     else:
         usage(
-            f"no pyproject.toml or requirements.txt format detected for path {dep_file}"
+            f"no pyproject.toml or requirements.txt format detected for file {dep_file!r}"
         )
     return updatable
 
