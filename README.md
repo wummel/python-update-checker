@@ -50,12 +50,18 @@ WARNING: update 'Django==5.2.0' --> 5.2.13
 INFO: Wrote 1 updated package versions to requirements.txt
 ```
 
+Script behaviour
+-----------------
+
 The exit code of `pcu check` is non-zero when updates are available.
 
-If your project relies on a [project directory](https://docs.astral.sh/uv/concepts/projects/layout/) (for example to define additional packages index in pyproject.toml), run `pcu` from your project root directory.
+Checking a `pyproject.toml` with `pcu` should be done from the project of the `pyproject.toml` file,
+especially if your project relies on a [project directory](https://docs.astral.sh/uv/concepts/projects/layout/) (for example to define additional packages index in pyproject.toml).
 
 After updating versions in pyproject.toml, run `uv lock --upgrade` to update
 the transitive dependencies in `uv.lock`.
+
+Pinned dependencies are packages with `==` or `===` constraints and no wildcards in the version.
 
 
 Installation
