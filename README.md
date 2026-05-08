@@ -1,7 +1,14 @@
 python-check-updates
 =====================
-Python-check-updates (pcu) checks or updates dependencies
-in `pyproject.toml` and `requirements.txt` files.  
+Python-check-updates (pcu) checks or updates pinned dependencies
+in `pyproject.toml` and `requirements.txt` files.
+
+This script is only useful for pinned dependencies.
+If you track compatibility in `pyproject.toml` and
+pin versions in `uv.lock`, this script will not be very useful.
+
+See https://github.com/astral-sh/uv/issues/6794 for a discussion
+about different pinning strategies.
 
 
 Features
@@ -99,9 +106,6 @@ Pcu needs Python >= 3.11 since it uses the tomllib Python module.
 
 Pcu consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.  
 This enables simple packaging and installation.
-
-Only handles pinned dependencies, since they should always be pinned to enable
-[reproducible builds](https://en.wikipedia.org/wiki/Reproducible_builds).
 
 
 Limitations
