@@ -231,8 +231,8 @@ def handle_pyproject_toml(
                 constraint_file=constraint_file,
                 color=color,
             )
-    if command == "update" and updatable > 0:
-        logger.info(f"Updated {updatable} package version(s) in {pyproject_path}")
+    if command == "update":
+        logger.info(f"updated {updatable} package version(s) in {pyproject_path}")
     return updatable
 
 
@@ -386,14 +386,14 @@ def parse_requirement(
     if line.endswith("\\"):
         line = line[:-1]
     if line.startswith("--hash"):
-        logger.info(f"Ignore requirements hash {line!r}")
+        logger.info(f"ignore requirements hash {line!r}")
         return None
     if re.search(r"^-r\s+", line):
         # recursion
         return line.split(maxsplit=1)[1].strip()
     if re.search(r"^-c\s+", line):
         logger.info(
-            f"Ignore constraints reference {line!r}, use pcu --constraints instead"
+            f"ignore constraints reference {line!r}, use pcu --constraints instead"
         )
         return None
     if line.startswith("./"):
@@ -529,10 +529,11 @@ def handle_requirements_txt(
                         )
                 else:
                     output.write(line)
-    if command == "update" and updatable > 0:
-        with open(requirements_txt_path, "w") as f:
-            f.write(output.getvalue())
-        logger.info("Updated {updatable} package version(s) in {requirements_txt_path}")
+    if command == "update":
+        if updatable > 0:
+            with open(requirements_txt_path, "w") as f:
+                f.write(output.getvalue())
+        logger.info("updated {updatable} package version(s) in {requirements_txt_path}")
     return updatable
 
 
@@ -657,10 +658,8 @@ def main(args: list[str]) -> int:
     finally:
         if remove_constraint_file and constraint_file:
             os.unlink(constraint_file)
-    if optargs.command == "check":
-        # check return non-zero exit code when updates are available
-        return updatable
-    return 0
+    # check command returns non-zero exit code when updates are available
+    return 1 if optargs.command == "check" and updatable > 0 else 0
 
 
 if __name__ == "__main__":
