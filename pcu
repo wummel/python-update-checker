@@ -538,6 +538,22 @@ def handle_requirements_txt(
     return updatable
 
 
+def handle_latest(package, optargs, constraint_file):
+    """Print latest version of package."""
+    exclude_newer = optargs.exclude_newer
+    try:
+        latest_version = get_latest_version(
+            package,
+            exclude_newer=exclude_newer,
+            constraint_file=constraint_file,
+        )
+        logger.info(f"{package}=={latest_version}")
+    except subprocess.CalledProcessError as exc:
+        # error getting latest version
+        err = f"{exc}, output={exc.output}, stderr={exc.stderr}"
+        logger.warning(f"error getting latest version for '{package}': {err}")
+
+
 def supports_color(handle: TextIO | Any) -> bool:
     """Determine if given file handle is a TTY suitable for color output."""
     return hasattr(handle, "isatty") and handle.isatty()
@@ -579,13 +595,28 @@ def get_option_parser() -> argparse.ArgumentParser:
         default=False,
         help="Print debug messages.",
     )
-    parser.add_argument(
-        "command", choices=["check", "update"], default="check", help="check or update"
-    )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(help='commands', dest='command')
+    parser_check = subparsers.add_parser('check', help='check for updated versions')
+    parser_check.add_argument(
         "dep_files",
         nargs="+",
         help="pyproject.toml or requirements.txt file",
+    )
+
+    parser_update = subparsers.add_parser('update', help='update to latest versions')
+    parser_update.add_argument(
+        "dep_files",
+        nargs="+",
+        help="pyproject.toml or requirements.txt file",
+    )
+
+    parser_latest = subparsers.add_parser(
+        'latest', help='get latest version of packages'
+    )
+    parser_latest.add_argument(
+        "packages",
+        nargs="+",
+        help="package names",
     )
     return parser
 
@@ -656,10 +687,17 @@ def main(args: list[str]) -> int:
             remove_constraint_file = True
     # handle all given dependency files
     try:
-        for dep_file in optargs.dep_files:
-            updatable = handle_dependency_file(dep_file, optargs, constraint_file)
+        if optargs.command in ("check", "update"):
+            for dep_file in optargs.dep_files:
+                updatable = handle_dependency_file(dep_file, optargs, constraint_file)
+        elif optargs.command == "latest":
+            for package in optargs.packages:
+                handle_latest(package, optargs, constraint_file)
+        else:
+            logger.error(f"unknown command {optargs.command}")
+            return -1
     except Exception as exc:
-        logger.error(f"error handling dependency files: {exc}")
+        logger.error(f"error handling command {optargs.command}: {exc}")
         return -1
     finally:
         if remove_constraint_file and constraint_file:
