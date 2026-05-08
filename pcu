@@ -23,6 +23,7 @@ import tempfile
 from packaging.requirements import Requirement
 from packaging.markers import Variable, MarkerList
 from packaging.utils import canonicalize_name
+from typing import TextIO, Any
 
 
 def usage(msg: str | None = None) -> None:
@@ -537,6 +538,11 @@ def handle_requirements_txt(
     return updatable
 
 
+def supports_color(handle: TextIO | Any) -> bool:
+    """Determine if given file handle is a TTY suitable for color output."""
+    return hasattr(handle, "isatty") and handle.isatty()
+
+
 def get_option_parser() -> argparse.ArgumentParser:
     """Initialize and return the option parser.
     @return: parser
@@ -563,7 +569,7 @@ def get_option_parser() -> argparse.ArgumentParser:
         "--no-color",
         action="store_false",
         dest="color",
-        default=True,
+        default=supports_color(sys.stdout),
         help="Do not print colored updated versions.",
     )
     parser.add_argument(
