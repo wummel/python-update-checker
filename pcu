@@ -2,7 +2,7 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#    "packaging==26.1",
+#    "packaging>=26.1",
 # ]
 # ///
 # Author: Bastian Kleineidam
