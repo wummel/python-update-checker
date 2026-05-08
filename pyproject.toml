@@ -35,4 +35,4 @@ dev = [
 [tool.project]
 # pin versions of Python and uv for development
 python_version_dev = "3.14.4"
-uv_version_dev = "0.11.8"
+uv_version_dev = "0.11.11"
