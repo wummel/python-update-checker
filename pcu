@@ -339,13 +339,17 @@ def update_pyproject_dependencies(
                 logger.info(f"updating '{dep}' --> {version}")
                 newdep = dep.replace(spec.version, latest_version, 1)
                 update_pyproject_pkg(
-                    newdep, project_dir, group=group, optional=optional
+                    newdep, pkg_req.name, project_dir, group=group, optional=optional
                 )
     return updatable
 
 
 def update_pyproject_pkg(
-    dependency: str, projectdir: str, group: None | str = None, optional: bool = False
+    dependency: str,
+    package: str,
+    projectdir: str,
+    group: None | str = None,
+    optional: bool = False,
 ) -> None:
     """Update one package in pyproject.toml."""
     command = [
@@ -356,6 +360,7 @@ def update_pyproject_pkg(
         "--quiet",
         "--frozen",
         "--color=never",
+        f"--upgrade-package={package}",
     ]
     if optional and group:
         command.append("--optional")
