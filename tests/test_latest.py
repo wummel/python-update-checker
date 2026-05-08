@@ -17,8 +17,7 @@
 import unittest
 import os
 import subprocess
-import shutil
-from . import basedir, datadir, needs_program, tempdir
+from . import basedir, needs_program
 
 
 class LatestTest(unittest.TestCase):
