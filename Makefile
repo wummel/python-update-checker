@@ -19,6 +19,8 @@ MAKEFLAGS += --no-builtin-rules
 PROJECT:=$(shell egrep "name[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
 VERSION:=$(shell egrep "version[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
 
+# exclude packages that are newer than this
+EXCLUDE_NEWER:="7 days"
 # Pytest options:
 # --full-trace: print full stacktrace on errors
 PYTESTOPTS?=--full-trace
@@ -90,7 +92,7 @@ reformat: ## format the python code
 checkoutdated: checkoutdated-py checkoutdated-gh
 
 checkoutdated-py:	## Check for outdated package requirements
-	pcu --exclude-newer="7 days" check pyproject.toml
+	./pcu --exclude-newer=$(EXCLUDE_NEWER) check pyproject.toml
 
 checkoutdated-gh:	## check for outdated github projects
 # github-check-outdated is a local tool which compares a given version with the latest available github release version
@@ -111,8 +113,13 @@ upgradeoutdated-gh:
 
 .PHONY: upgradeoutdated-py
 upgradeoutdated-py:	## upgrade dependencies in pyproject.toml and uv.lock
-	pcu --exclude-newer="7 days" update pyproject.toml
-	uv lock --upgrade
+	# upgrade pyproject.toml dependencies
+	./pcu --exclude-newer=$(EXCLUDE_NEWER) update pyproject.toml
+	# upgrade inline depencencies in pcu script
+	sed -i -e 's/"packaging>=.*"/"packaging>=$(shell grep "packaging>=" pyproject.toml  | cut -d'"' -f2 | cut -d= -f2)"/' pcu
+	# upgrade depencencies in uv lock file
+	uv lock --exclude-newer=$(EXCLUDE_NEWER) --upgrade
+	# install upgraded package versions in virtual environment
 	$(MAKE) init
 
 
