@@ -15,9 +15,8 @@
 """Test latest version printing for packages."""
 
 import unittest
-import os
 import subprocess
-from . import basedir, needs_program
+from . import needs_program
 
 
 class LatestTest(unittest.TestCase):
@@ -26,8 +25,7 @@ class LatestTest(unittest.TestCase):
     @needs_program('uv')
     def test_pyproject_check(self):
         """Run pcu latest"""
-        pcu = os.path.join(os.path.dirname(basedir), "pcu")
-        cmd = [pcu, "latest", "Django", "requests"]
+        cmd = ["uv", "run", "pcu", "latest", "Django", "requests"]
         result = subprocess.run(cmd, check=False, text=True, capture_output=True)
         output = result.stdout.strip()
         self.assertTrue(result.returncode == 0)

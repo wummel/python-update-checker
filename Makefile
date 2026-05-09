@@ -30,24 +30,15 @@ TESTS ?= tests/
 TESTOPTS=
 # python files and directories
 PY_FILES_DIRS:=\
-  pcu \
+  src \
   tests
 
 # Release configuration
 RELEASE_NAME:=$(subst -,_,$(PROJECT))-$(VERSION)
 RELEASE_SOURCE:=$(RELEASE_NAME).tar.gz
+RELEASE_WHEEL:=$(RELEASE_NAME)-py3-none-any.whl
 RELEASE_BRANCH:=main
 RELEASE_TAG:=$(VERSION)
-RELEASE_FILES:=\
-  scripts \
-  tests \
-  .gitignore \
-  .ruff.toml \
-  COPYING \
-  Makefile \
-  pcu \
-  pyproject.toml \
-  README.md
 
 
 ############ Default target ############
@@ -92,7 +83,7 @@ reformat: ## format the python code
 checkoutdated: checkoutdated-py checkoutdated-gh
 
 checkoutdated-py:	## Check for outdated package requirements
-	./pcu --exclude-newer=$(EXCLUDE_NEWER) check pyproject.toml
+	uv run pcu --exclude-newer=$(EXCLUDE_NEWER) check pyproject.toml
 
 checkoutdated-gh:	## check for outdated github projects
 # github-check-outdated is a local tool which compares a given version with the latest available github release version
@@ -114,9 +105,7 @@ upgradeoutdated-gh:
 .PHONY: upgradeoutdated-py
 upgradeoutdated-py:	## upgrade dependencies in pyproject.toml and uv.lock
 	# upgrade pyproject.toml dependencies
-	./pcu --exclude-newer=$(EXCLUDE_NEWER) update pyproject.toml
-	# upgrade inline depencencies in pcu script
-	sed -i -e 's/"packaging>=.*"/"packaging>=$(shell grep "packaging>=" pyproject.toml  | cut -d'"' -f2 | cut -d= -f2)"/' pcu
+	uv run pcu --exclude-newer=$(EXCLUDE_NEWER) update pyproject.toml
 	# upgrade depencencies in uv lock file
 	uv lock --exclude-newer=$(EXCLUDE_NEWER) --upgrade
 	# install upgraded package versions in virtual environment
@@ -138,25 +127,16 @@ typecheck:	## run the ty type checker
 
 .PHONY: distclean
 distclean:
-	rm -rf dist tests/__pycache__
+	rm -rf dist $(shell find src tests -type d -name __pycache__)
+
+.PHONY: dist
+dist:
+	uv build
 
 # Releases are tagged with the version, ie. "0.5"
 .PHONY: release
 release: distclean checkrelease	## create release
-	if [ ! -f dist/$(RELEASE_SOURCE) ]; then \
-	  mkdir -p dist; \
-	  git checkout tags/$(RELEASE_TAG) && \
-	  tar \
-	    --sort=name \
-		--mtime='$(shell git log -1 --pretty=%cI)' \
-		--owner=0 --group=0 --numeric-owner \
-		--pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
-		--gzip \
-		--create \
-		--file dist/$(RELEASE_SOURCE) $(RELEASE_FILES) && \
-	  git checkout $(RELEASE_BRANCH); \
-	  echo "Released dist/$(RELEASE_SOURCE)"; \
-	fi
+	$(MAKE) dist release-gh release-pypi
 
 # export GITHUB_TOKEN for the gh command
 # Generate a fine grained access token with:

@@ -28,8 +28,7 @@ class RequirementsTxtTest(unittest.TestCase):
     def test_requirements_check(self):
         """Run pcu check"""
         filename = os.path.join(datadir, "requirements.txt")
-        pcu = os.path.join(os.path.dirname(basedir), "pcu")
-        cmd = [pcu, "check", filename]
+        cmd = ["uv", "run", "pcu", "check", filename]
         result = subprocess.run(cmd, check=False, text=True, capture_output=True)
         output = result.stdout.strip()
         self.assertTrue(result.returncode > 0)
@@ -43,8 +42,7 @@ class RequirementsTxtTest(unittest.TestCase):
     def test_requirements_check_package(self):
         """Run pcu check with package filter"""
         filename = os.path.join(datadir, "requirements.txt")
-        pcu = os.path.join(os.path.dirname(basedir), "pcu")
-        cmd = [pcu, "--package", "ty", "check", filename]
+        cmd = ["uv", "run", "pcu", "--package", "ty", "check", filename]
         result = subprocess.run(cmd, check=False, text=True, capture_output=True)
         output = result.stdout.strip()
         self.assertTrue(result.returncode > 0)
@@ -75,8 +73,7 @@ class RequirementsTxtTest(unittest.TestCase):
                 content = f.read()
                 for dep in packagedeps:
                     self.assertIn(dep, content)
-            pcu = os.path.join(os.path.dirname(basedir), "pcu")
-            cmd = [pcu, "update", filename]
+            cmd = ["uv", "run", "pcu", "update", filename]
             result = subprocess.run(cmd, check=True, text=True, capture_output=True)
             output = result.stdout.strip()
             self.assertIn("updating 'argcomplete==", output)
