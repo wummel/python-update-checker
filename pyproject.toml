@@ -29,7 +29,7 @@ dependencies = [
 puc = "puc:cli.main"
 
 [dependency-groups]
-# these modules are only needed for development
+# these packages are only needed for development
 dev = [
   # for python code linting
   "ruff==0.15.12",
