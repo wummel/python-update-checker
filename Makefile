@@ -16,8 +16,8 @@ MAKEFLAGS += --no-builtin-rules
 
 
 ############ Configuration ############
-PROJECT:=$(shell egrep "name[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
-VERSION:=$(shell egrep "version[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
+PROJECT:=$(shell egrep "^name[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
+VERSION:=$(shell egrep "^version[[:space:]]*=" pyproject.toml | cut -d'"' -f2)
 
 # exclude packages that are newer than this
 EXCLUDE_NEWER:="7 days"
