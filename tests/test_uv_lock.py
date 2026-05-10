@@ -54,7 +54,7 @@ class UvLockTest(unittest.TestCase):
         tmpdir = tempdir(dir=basedir)
         shutil.copy(origfile, tmpdir)
         projectfile = os.path.join(datadir, "pyproject_compatible.toml")
-        shutil.copy(origfile, os.path.join(tmpdir, "pyproject.toml"))
+        shutil.copy(projectfile, os.path.join(tmpdir, "pyproject.toml"))
         try:
             filename = os.path.join(tmpdir, "uv.lock")
             cmd = ["uv", "run", "pcu", "update", filename]
