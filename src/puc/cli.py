@@ -183,7 +183,7 @@ def main() -> int:
             constraint_file = constraints
         else:
             _fd, constraint_file = tempfile.mkstemp(
-                suffix=".txt", prefix="pcu-constraints-"
+                suffix=".txt", prefix="puc-constraints-"
             )
             with open(constraint_file, "w") as f:
                 f.write(constraints)

@@ -137,7 +137,7 @@ def parse_requirement(
         return line.split(maxsplit=1)[1].strip()
     if re.search(r"^-c\s+", line):
         logger.info(
-            f"ignore constraints reference {line!r}, use pcu --constraints instead"
+            f"ignore constraints reference {line!r}, use puc --constraints instead"
         )
         return None
     if line.startswith("./"):

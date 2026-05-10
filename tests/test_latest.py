@@ -20,12 +20,12 @@ from . import needs_program
 
 
 class LatestTest(unittest.TestCase):
-    """Test class for 'pcu latest' command."""
+    """Test class for 'puc latest' command."""
 
     @needs_program('uv')
     def test_pyproject_check(self):
-        """Run pcu latest"""
-        cmd = ["uv", "run", "pcu", "latest", "Django", "requests"]
+        """Run puc latest"""
+        cmd = ["uv", "run", "puc", "latest", "Django", "requests"]
         result = subprocess.run(cmd, check=False, text=True, capture_output=True)
         output = result.stdout.strip()
         self.assertTrue(result.returncode == 0)

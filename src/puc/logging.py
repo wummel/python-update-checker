@@ -5,7 +5,7 @@
 import logging
 import sys
 
-logger = logging.getLogger("pcu")
+logger = logging.getLogger("puc")
 
 
 def init_logging(stream=sys.stdout) -> None:

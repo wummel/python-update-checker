@@ -26,9 +26,9 @@ class UvLockTest(unittest.TestCase):
 
     @needs_program('uv')
     def test_uvlock_check(self):
-        """Run pcu check"""
+        """Run puc check"""
         filename = os.path.join(datadir, "uv.lock")
-        cmd = ["uv", "run", "pcu", "check", filename]
+        cmd = ["uv", "run", "puc", "check", filename]
         result = subprocess.run(cmd, check=False, text=True, capture_output=True)
         output = result.stdout.strip()
         self.assertTrue(result.returncode > 0)
@@ -37,9 +37,9 @@ class UvLockTest(unittest.TestCase):
 
     @needs_program('uv')
     def test_uvlock_check_package(self):
-        """Run pcu check with package filter"""
+        """Run puc check with package filter"""
         filename = os.path.join(datadir, "uv.lock")
-        cmd = ["uv", "run", "pcu", "--package", "ty", "check", filename]
+        cmd = ["uv", "run", "puc", "--package", "ty", "check", filename]
         result = subprocess.run(cmd, check=False, text=True, capture_output=True)
         output = result.stdout.strip()
         self.assertTrue(result.returncode > 0)
@@ -48,7 +48,7 @@ class UvLockTest(unittest.TestCase):
 
     @needs_program('uv')
     def test_uvlock_update(self):
-        """Run pcu update"""
+        """Run puc update"""
         # create a temporary directory for updating the file
         origfile = os.path.join(datadir, "uv.lock")
         tmpdir = tempdir(dir=basedir)
@@ -57,7 +57,7 @@ class UvLockTest(unittest.TestCase):
         shutil.copy(projectfile, os.path.join(tmpdir, "pyproject.toml"))
         try:
             filename = os.path.join(tmpdir, "uv.lock")
-            cmd = ["uv", "run", "pcu", "update", filename]
+            cmd = ["uv", "run", "puc", "update", filename]
             result = subprocess.run(cmd, check=True, text=True, capture_output=True)
             output = result.stdout.strip()
             self.assertIn("updating 'ty==", output)

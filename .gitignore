@@ -11,8 +11,6 @@ __pycache__
 /.achievements
 /MANIFEST
 
-# local files
-/pcu.egg-info/
 # configuration for direnv(1)
 /.envrc
 

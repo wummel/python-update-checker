@@ -1,11 +1,7 @@
-python-check-updates
-=====================
-Python-check-updates (pcu) checks or updates pinned dependencies
-in `pyproject.toml` and `requirements.txt` files.
-
-This script is only useful for pinned dependencies.
-If you track compatibility in `pyproject.toml` and
-pin versions in `uv.lock`, this script will not be very useful.
+python-update-checker
+======================
+Python-update-checker (puc) checks or updates pinned dependencies
+in `pyproject.toml`, `requirements.txt` or `uv.lock` files.
 
 See https://github.com/astral-sh/uv/issues/6794 for a discussion
 about different pinning strategies.
@@ -15,7 +11,7 @@ Features
 ---------
 
 * updates pinned dependencies, ignores unpinned dependencies
-* supports both pyproject.toml and requirements.txt formats
+* supports pyproject.toml, uv.lock and requirements.txt formats
 * supports `[project.dependencies]`, `[project.optional-dependencies]` and `[dependency-groups]` in pyproject.toml
 * supports recursive references (-r) in requirements.txt formats
 * can run in check only mode, ie. it checks if updates are available
@@ -31,26 +27,26 @@ Examples
 
 ```bash
 $ # check all pinned packages for updates in pyproject.toml
-$ pcu check pyproject.toml
-pcu INFO: check pyproject file pyproject.toml
-pcu WARNING: found update 'ty==0.0.29' --> 0.0.32
+$ puc check pyproject.toml
+puc INFO: check pyproject file pyproject.toml
+puc WARNING: found update 'ty==0.0.29' --> 0.0.32
 
 $ # update all pinned packages in pyproject.toml
 $ # limit updates to versions that are at least 7 days old
-$ pcu --exclude-newer="7 days" update pyproject.toml
-pcu INFO: update pyproject file pyproject.toml
-pcu INFO: updating 'ty==0.0.29' --> 0.0.31
-pcu INFO: Wrote 1 updated package version(s) to pyproject.toml
+$ puc --exclude-newer="7 days" update pyproject.toml
+puc INFO: update pyproject file pyproject.toml
+puc INFO: updating 'ty==0.0.29' --> 0.0.31
+puc INFO: Wrote 1 updated package version(s) to pyproject.toml
 
 $ # check all pinned packages for updates in requirements.txt
-$ pcu check requirements.txt
-pcu INFO: check requirements file requirements.txt
-pcu WARNING: found update 'argcomplete==3.6.1' --> 3.6.3
-pcu WARNING: found update 'Django==5.2.0' --> 6.0.4
+$ puc check requirements.txt
+puc INFO: check requirements file requirements.txt
+puc WARNING: found update 'argcomplete==3.6.1' --> 3.6.3
+puc WARNING: found update 'Django==5.2.0' --> 6.0.4
 
 $ # update only the django package version in requirements.txt
 $ # limit updates to django versions less than 6
-$ pcu --package="Django" --constraints="Django<6" update requirements.txt
+$ puc --package="Django" --constraints="Django<6" update requirements.txt
 INFO: update requirements file requirements.txt
 INFO: updating 'Django==5.2.0' --> 5.2.13
 INFO: Wrote 1 updated package version(s) to requirements.txt
@@ -59,9 +55,10 @@ INFO: Wrote 1 updated package version(s) to requirements.txt
 Script behaviour
 -----------------
 
-The exit code of `pcu check` is non-zero when updates are available.
+The exit code of `puc check` is non-zero when updates are available.
 
-Checking a `pyproject.toml` with `pcu` should be done from the project of the `pyproject.toml` file,
+Checking a `pyproject.toml` or `uv.lock`file with `puc` should be done
+from the project of the `pyproject.toml` file,
 especially if your project relies on a [project directory](https://docs.astral.sh/uv/concepts/projects/layout/) (for example to define additional packages index in pyproject.toml).
 
 After updating versions in pyproject.toml, run `uv lock --upgrade` to update
@@ -74,19 +71,8 @@ Installation
 -------------
 
 1) Install [python uv](https://docs.astral.sh/uv/getting-started/installation/)
-2) Copy the [pcu](https://raw.githubusercontent.com/wummel/python-check-updates/refs/heads/main/pcu) script into a PATH directory.
+2) Install puc with `uv pip install python-update-checker`.
 
-Example for Linux and MacOS:
-
-   ```bash
-   # create directory
-   mkdir -p ~/.local/bin
-   # download pcu
-   curl https://raw.githubusercontent.com/wummel/python-check-updates/refs/heads/main/pcu > ~/.local/bin/pcu
-   chmod 0755 ~/.local/bin/pcu
-   # add directory to PATH
-   export PATH=$PATH:~/.local/bin
-   ```
 
 
 Architecture
@@ -96,24 +82,23 @@ Dependencies are
 
 * [uv](https://docs.astral.sh/uv/):
   The uv binary must be available for the script to call.  
-  Pcu uses `echo "package" | uv pip compile -` to get latest package versions.  
-  Pcu uses `uv add "package==<version>"` to update pyproject.toml dependencies.
+  puc uses `echo "package" | uv pip compile -` to get latest package versions.  
+  puc uses `uv add "package==<version>"` to update pyproject.toml dependencies.
 
 * [packaging](https://packaging.pypa.io/):
   Parses dependencies with the packaging.requirements.Requirement class.
 
-Pcu needs Python >= 3.11 since it uses the tomllib Python module.
+puc needs Python >= 3.11 since it uses the tomllib Python module.
 
-Pcu consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.  
+puc consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.  
 This enables simple packaging and installation.
 
 
 Limitations
 ------------
 
-* No library api is available, only the `pcu` command line interface.
 * No support for custom dependency formats in pyproject.toml
   (eg. `[tool.poetry.dependencies]`).
-* Pcu has limited support for environment markers.
+* puc has limited support for environment markers.
 * Constraint references (`-c`) inside requirements.txt are not supported.  
   Use the `--constraints` option instead.
