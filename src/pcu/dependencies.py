@@ -1,11 +1,12 @@
 # Author: Bastian Kleineidam
 # Copyright: GPL-v3
-"""Dependency handling functions."""
+"""Dependency helper functions."""
 
 import subprocess
 import re
 from packaging.requirements import Requirement
 from packaging.markers import Variable, MarkerList
+from packaging.version import parse as parse_version
 from .logging import logger
 
 
@@ -179,3 +180,8 @@ def get_marker_value(
             if var == varname:
                 return value
     return None
+
+
+def is_newer_version(old_version, new_version):
+    """Check that new_version is newer than old_version."""
+    return parse_version(new_version) > parse_version(old_version)

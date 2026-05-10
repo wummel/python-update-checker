@@ -1,0 +1,8 @@
+[project]
+name = "test"
+version = "0.1"
+requires-python = ">=3.11"
+dependencies = [
+  "ty>=0.0.29",
+  "ruff>=0.15.9",
+]

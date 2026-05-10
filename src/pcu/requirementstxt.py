@@ -1,6 +1,6 @@
 # Author: Bastian Kleineidam
 # Copyright: GPL-v3
-"""Functions to handle requirements.txt files."""
+"""Handle requirements.txt files."""
 
 import subprocess
 import os

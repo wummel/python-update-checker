@@ -1,6 +1,6 @@
 # Author: Bastian Kleineidam
 # Copyright: GPL-v3
-"""Functions to handle pyproject.toml files."""
+"""Handle pyproject.toml files."""
 
 import subprocess
 import os

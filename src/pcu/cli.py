@@ -19,6 +19,7 @@ from .dependencies import (
 from .logging import logger
 from .pyprojecttoml import handle_pyproject_toml
 from .requirementstxt import handle_requirements_txt
+from .uvlock import handle_uv_lock
 
 
 def usage(msg: str | None = None) -> None:
@@ -128,6 +129,16 @@ def handle_dependency_file(dep_file: str, optargs, constraint_file):
     if dep_file_normalized == "pyproject.toml":
         # pyproject.toml format
         updatable = handle_pyproject_toml(
+            dep_file,
+            packages=packages,
+            command=optargs.command,
+            exclude_newer=optargs.exclude_newer,
+            constraint_file=constraint_file,
+            color=optargs.color,
+        )
+    elif dep_file_normalized == "uv.lock":
+        # pyproject.toml format
+        updatable = handle_uv_lock(
             dep_file,
             packages=packages,
             command=optargs.command,
