@@ -55,5 +55,5 @@ source-include = [
 
 [tool.project]
 # pin versions of Python and uv for development
-python_version_dev = "3.14.4"
-uv_version_dev = "0.11.11"
+python_version_dev = "3.14.5"
+uv_version_dev = "0.11.13"
