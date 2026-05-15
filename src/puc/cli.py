@@ -9,6 +9,7 @@ import argparse
 import sys
 import logging
 import os
+import shlex
 import tempfile
 from packaging.utils import canonicalize_name
 from typing import TextIO, Any
@@ -165,6 +166,7 @@ def handle_dependency_file(dep_file: str, optargs, constraint_file):
 
 def main() -> int:
     """Parse options and check or update dependencies."""
+    logger.info(f"{shlex.join(sys.argv)}")
     # parse options
     try:
         optargs = get_option_parser().parse_args(sys.argv[1:])
@@ -208,7 +210,3 @@ def main() -> int:
             os.unlink(constraint_file)
     # check command returns non-zero exit code when updates are available
     return 1 if optargs.command == "check" and updatable > 0 else 0
-
-
-# if __name__ == "__main__":
-#    sys.exit(main(sys.argv[1:]))
