@@ -13,6 +13,7 @@ from .logging import logger
 def get_latest_version(
     package: str,
     exclude_newer: None | str = None,
+    exclude_newer_package: None | str = None,
     constraint_file: None | str = None,
     python_platform: str | None = None,
     python_version: str | None = None,
@@ -35,6 +36,8 @@ def get_latest_version(
     ]
     if exclude_newer:
         cmd.extend(("--exclude-newer", exclude_newer))
+    if exclude_newer_package:
+        cmd.extend(("--exclude-newer-package", exclude_newer_package))
     if constraint_file:
         cmd.extend(("--constraints", constraint_file))
     if python_platform:

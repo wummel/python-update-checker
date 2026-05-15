@@ -26,6 +26,7 @@ def handle_requirements_txt(
     command: None | str = None,
     packages=None,
     exclude_newer: None | str = None,
+    exclude_newer_package: None | str = None,
     constraint_file: None | str = None,
     color: bool = True,
     rec_level: int = 0,
@@ -62,6 +63,7 @@ def handle_requirements_txt(
                         command,
                         packages=packages,
                         exclude_newer=exclude_newer,
+                        exclude_newer_package=exclude_newer_package,
                         constraint_file=constraint_file,
                         color=color,
                         rec_level=rec_level + 1,
@@ -72,6 +74,7 @@ def handle_requirements_txt(
                     latest_version = get_latest_version(
                         pkg_req.name,
                         exclude_newer=exclude_newer,
+                        exclude_newer_package=exclude_newer_package,
                         constraint_file=constraint_file,
                         python_platform=get_python_platform_from_req(pkg_req),
                         python_version=get_min_python_version_from_req(pkg_req),

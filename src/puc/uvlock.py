@@ -19,6 +19,7 @@ def handle_uv_lock(
     command: None | str = None,
     packages=None,
     exclude_newer: None | str = None,
+    exclude_newer_package: None | str = None,
     constraint_file: None | str = None,
     color: bool = True,
 ) -> int:
@@ -55,6 +56,7 @@ def handle_uv_lock(
             command=command,
             packages=packages,
             exclude_newer=exclude_newer,
+            exclude_newer_package=exclude_newer_package,
             constraint_file=constraint_file,
             color=color,
         )
@@ -70,6 +72,7 @@ def update_uvlock_dependency(
     command: None | str = None,
     packages=None,
     exclude_newer: None | str = None,
+    exclude_newer_package: None | str = None,
     constraint_file: None | str = None,
     color: bool = True,
 ) -> int:
@@ -82,6 +85,7 @@ def update_uvlock_dependency(
         latest_version = get_latest_version(
             package,
             exclude_newer=exclude_newer,
+            exclude_newer_package=exclude_newer_package,
             constraint_file=constraint_file,
         )
     except subprocess.CalledProcessError as exc:

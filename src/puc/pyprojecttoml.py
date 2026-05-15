@@ -22,6 +22,7 @@ def handle_pyproject_toml(
     command: None | str = None,
     packages=None,
     exclude_newer: None | str = None,
+    exclude_newer_package: None | str = None,
     constraint_file: None | str = None,
     color: bool = True,
 ) -> int:
@@ -53,6 +54,7 @@ def handle_pyproject_toml(
                 command=command,
                 packages=packages,
                 exclude_newer=exclude_newer,
+                exclude_newer_package=exclude_newer_package,
                 constraint_file=constraint_file,
                 color=color,
             )
@@ -67,6 +69,7 @@ def handle_pyproject_toml(
                 command=command,
                 packages=packages,
                 exclude_newer=exclude_newer,
+                exclude_newer_package=exclude_newer_package,
                 constraint_file=constraint_file,
                 color=color,
             )
@@ -80,6 +83,7 @@ def handle_pyproject_toml(
                 command=command,
                 packages=packages,
                 exclude_newer=exclude_newer,
+                exclude_newer_package=exclude_newer_package,
                 constraint_file=constraint_file,
                 color=color,
             )
@@ -97,6 +101,7 @@ def update_pyproject_dependencies(
     command: None | str = None,
     packages=None,
     exclude_newer: None | str = None,
+    exclude_newer_package: None | str = None,
     constraint_file: None | str = None,
     color: bool = True,
 ) -> int:
@@ -122,6 +127,7 @@ def update_pyproject_dependencies(
             latest_version = get_latest_version(
                 pkg_req.name,
                 exclude_newer=exclude_newer,
+                exclude_newer_package=exclude_newer_package,
                 constraint_file=constraint_file,
                 python_platform=get_python_platform_from_req(pkg_req),
                 python_version=get_min_python_version_from_req(pkg_req),
