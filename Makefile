@@ -83,7 +83,10 @@ reformat: ## format the python code
 checkoutdated: checkoutdated-py checkoutdated-gh
 
 checkoutdated-py:	## Check for outdated package requirements
-	uv run puc --exclude-newer=$(EXCLUDE_NEWER) check pyproject.toml
+	uv run puc \
+	  --exclude-newer $(EXCLUDE_NEWER) \
+	  --exclude-newer-package "python-update-checker=1 minute" \
+	  check pyproject.toml uv.lock
 
 checkoutdated-gh:	## check for outdated github projects
 # github-check-outdated is a local tool which compares a given version with the latest available github release version
@@ -105,9 +108,13 @@ upgradeoutdated-gh:
 .PHONY: upgradeoutdated-py
 upgradeoutdated-py:	## upgrade dependencies in pyproject.toml and uv.lock
 	# upgrade pyproject.toml dependencies
-	uv run puc --exclude-newer=$(EXCLUDE_NEWER) update pyproject.toml
+	uv run puc \
+	  --exclude-newer $(EXCLUDE_NEWER) \
+	  update pyproject.toml
 	# upgrade depencencies in uv lock file
-	uv lock --exclude-newer=$(EXCLUDE_NEWER) --upgrade
+	uv lock \
+	  --exclude-newer $(EXCLUDE_NEWER) \
+	  --upgrade
 	# install upgraded package versions in virtual environment
 	$(MAKE) init
 
