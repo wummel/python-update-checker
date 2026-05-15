@@ -155,7 +155,8 @@ release-gh:	## upload a new release to github
 	  --prerelease=false \
 	  --verify-tag \
 	  "$(RELEASE_TAG)" \
-	  dist/$(RELEASE_SOURCE)
+	  dist/$(RELEASE_SOURCE) \
+	  dist/$(RELEASE_WHEEL)
 
 .PHONY: release-pypi
 release-pypi: ## upload a new release to pypi
