@@ -58,8 +58,8 @@ Script behaviour
 The exit code of `puc check` is non-zero when updates are available.
 
 Checking a `pyproject.toml` or `uv.lock`file with `puc` should be done
-from the project of the `pyproject.toml` file,
-especially if your project relies on a [project directory](https://docs.astral.sh/uv/concepts/projects/layout/) (for example to define additional packages index in pyproject.toml).
+from the directory of the `pyproject.toml` file,
+especially if your project relies on a [project directory](https://docs.astral.sh/uv/concepts/projects/layout/) (for example to define additional package indexes in pyproject.toml).
 
 After updating versions in pyproject.toml, run `uv lock --upgrade` to update
 the transitive dependencies in `uv.lock`.
@@ -89,9 +89,6 @@ Dependencies are
   Parses dependencies with the packaging.requirements.Requirement class.
 
 puc needs Python >= 3.11 since it uses the tomllib Python module.
-
-puc consists of a single python script. The script uses [inline script metadata](https://peps.python.org/pep-0723/) to be executed directly with `uv run --script`.  
-This enables simple packaging and installation.
 
 
 Limitations
