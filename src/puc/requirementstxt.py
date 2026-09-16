@@ -95,11 +95,13 @@ def handle_requirements_txt(
                     latest_version = None
                 spec = next(s for s in pkg_req.specifier)
                 if packages and canonicalize_name(pkg_req.name) not in packages:
+                    # filtered by packages
                     output.write(line)
                 elif (
                     exclude_packages
                     and canonicalize_name(pkg_req.name) in exclude_packages
                 ):
+                    # filtered by exclude_packages
                     output.write(line)
                 elif latest_version is not None and latest_version != spec.version:
                     updatable += 1

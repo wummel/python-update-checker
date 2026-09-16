@@ -43,7 +43,7 @@ def handle_pyproject_toml(
         except Exception as exc:
             logger.error(f"error parsing {pyproject_path}: {exc}")
             return updatable
-        project = pyproject.get("project", dict())
+        project = pyproject.get("project", {})
         if not project:
             logger.warning(f"no project defined in {pyproject_path}")
             return updatable

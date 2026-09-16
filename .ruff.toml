@@ -2,23 +2,26 @@ target-version = "py311"
 
 [lint]
 select = [
-    "E", # pycodestyle
-    "F", # pyflakes
-    "B", # flake8-bugbear
-    "I", # isort
-    "D", # pydocstyle
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "D",   # pydocstyle
+    "W",   # pycodestyle warnings
+    "C4",  # flake8-comprehensions (idiomatic collections)
     "FIX", # fixme
-    "FA", # future-annotation
+    "FA",  # future-annotation
     "LOG", # logging
     "INP", # PEP420
     "PIE", # flake8-pie
-    "RSE", # flake8-raise
-    "RET", # flake8-return
     "PLC", # pylint convention
     "PLE", # pylint error
     "PLW", # pylint warning
-    "RUF", # ruff
-    "UP", # pyupgrade
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "RUF", # Ruff-specific rules
+    "SIM", # flake8-simplify (simplify code)
+    "UP",  # pyupgrade (modernize syntax)
     "YTT", # flake8-2020
 ]
 
