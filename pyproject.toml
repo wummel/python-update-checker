@@ -42,13 +42,13 @@ dev = [
   # for testing
   "pytest==9.1.1",
   # for python code linting
-  "ruff==0.16.6",
+  "ruff==0.16.8",
   # Markdown style checking and formatting
-  "rumdl==0.2.69",
+  "rumdl==0.2.74",
   # reformat toml files
-  "tombi==1.5.4",
+  "tombi==1.5.5",
   # for python type checking
-  "ty==0.0.79",
+  "ty==0.0.82",
   # for auditing github actions
   "zizmor==1.30.1",
 ]
@@ -60,7 +60,7 @@ build-backend = "uv_build"
 [tool.project]
 # pin versions of Python and uv for development
 python_version_dev = "3.14.7"
-uv_version_dev = "0.12.15"
+uv_version_dev = "0.12.19"
 
 [tool.uv.build-backend]
 module-name = "puc"
