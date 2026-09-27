@@ -5,8 +5,6 @@ in `pyproject.toml`, `requirements.txt` or `uv.lock` files.
 
 If you are developing an application you should pin all dependencies.
 When developing a library, only development dependencies should be pinned.
-Since puc updates pinned dependencies, it is mostly suitable
-when developing applications.
 
 See [https://github.com/astral-sh/uv/issues/6794] for a discussion
 about different pinning strategies.
@@ -28,11 +26,11 @@ uv sync
   and `[dependency-groups]` in pyproject.toml
 * supports legacy dependency format `[tool.uv.dev-dependencies]`
   in pyproject.toml
-* supports recursive references (-r) in requirements.txt formats
+* supports recursive references (`-r`) in requirements.txt formats
 * can run in check only mode, ie. it checks if updates are available
 * limit updates to specific packages
 * can ignore packages
-* limit updates with package version constraints (ie. "django<6")
+* limit updates with package version constraints (ie. `"django<6"`)
 * limit updates to versions that were uploaded prior to a given date
 * (limited) support for environment markers, ie. `"pywin32==311; os_name=='nt'"`
 * runs on Linux, MacOS and Windows platforms
@@ -126,3 +124,4 @@ So minimum version requirements should be updated manually.
 * puc has limited support for environment markers.
 * Constraint references (`-c`) inside requirements.txt are not supported.  
   Use the `--constraints` option instead.
+* No support for updating non-pinned dependencies.
