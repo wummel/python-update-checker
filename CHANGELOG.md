@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0
+
+Release date: xx.xx.2026
+
+- Parse and use a `requires-python` version found in `pyproject.toml`
+
 ## 1.4.0
 
 Release date: 09.09.2026
