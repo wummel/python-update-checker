@@ -105,7 +105,7 @@ checkoutdated-gh: checkratelimit-gh	## check for outdated github projects
 # see https://gist.github.com/wummel/ef14989766009effa4e262b01096fc8c for an example implementation
 	@echo "Check for outdated Github tools"
 	github-check-outdated astral-sh uv "$(shell uv --version | cut -f2 -d" ")"
-	github-check-outdated python cpython v$(shell python --version | cut -f2 -d" ") '^v3\.14\.[0-9]+$$'
+	github-check-outdated python cpython v$(shell python --version | cut -f2 -d" ") --version-pattern='^v3\.14\.[0-9]+$$'
 
 .PHONY: checkratelimit-gh
 checkratelimit-gh: ## test for rate limiting
@@ -123,7 +123,7 @@ upgradeoutdated:	upgradeoutdated-gh upgradeoutdated-py
 upgradeoutdated-gh:	checkratelimit-gh
 	sed -i -e 's/uv_version_dev = ".*"/uv_version_dev = "$(shell github-check-outdated astral-sh uv 0 | cut -f4 -d" ")"/' pyproject.toml
 	sed -i -e 's/ version: ".*"/ version: "$(shell github-check-outdated astral-sh uv 0 | cut -f4 -d" ")"/' .github/workflows/python-package.yml
-	sed -i -e 's/python_version_dev = ".*"/python_version_dev = "$(shell github-check-outdated python cpython 0 '^v3\.14\.[0-9]+$$' | cut -f4 -d" " | cut -b2-)"/' pyproject.toml
+	sed -i -e 's/python_version_dev = ".*"/python_version_dev = "$(shell github-check-outdated python cpython 0 --version-pattern='^v3\.14\.[0-9]+$$' | cut -f4 -d" " | cut -b2-)"/' pyproject.toml
 	scripts/install_dev.sh
 
 .PHONY: upgradeoutdated-py
