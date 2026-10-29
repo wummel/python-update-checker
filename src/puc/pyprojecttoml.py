@@ -6,6 +6,7 @@ import subprocess
 import os
 import tomllib
 import logging
+import re
 from packaging.utils import canonicalize_name
 from packaging.requirements import Requirement
 
@@ -47,6 +48,11 @@ def handle_pyproject_toml(
         if not project:
             logger.warning(f"no project defined in {pyproject_path}")
             return updatable
+        py_req = project.get("requires-python")
+        if py_req and re.match(r">=\d+\.\d+$", py_req):
+            min_python_ver = py_req[2:]
+        else:
+            min_python_ver = None
         if pyproject.get("tool", {}).get("poetry", {}).get("dependencies", {}):
             logger.warning(f"[tool.poetry.dependencies] detected in {pyproject_path}")
             logger.warning(
@@ -67,6 +73,7 @@ def handle_pyproject_toml(
                 exclude_packages=exclude_packages,
                 constraint_file=constraint_file,
                 color=color,
+                min_python_ver=min_python_ver,
             )
         # update optional dependencies
         for group, deps in project.get("optional-dependencies", {}).items():
@@ -83,6 +90,7 @@ def handle_pyproject_toml(
                 exclude_packages=exclude_packages,
                 constraint_file=constraint_file,
                 color=color,
+                min_python_ver=min_python_ver,
             )
         # update dependency groups
         for group, deps in pyproject.get("dependency-groups", {}).items():
@@ -98,6 +106,7 @@ def handle_pyproject_toml(
                 exclude_packages=exclude_packages,
                 constraint_file=constraint_file,
                 color=color,
+                min_python_ver=min_python_ver,
             )
         # update legacy uv dev dependencies
         # See https://docs.astral.sh/uv/concepts/projects/dependencies/#legacy-dev-dependencies
@@ -122,6 +131,7 @@ def handle_pyproject_toml(
                 exclude_packages=exclude_packages,
                 constraint_file=constraint_file,
                 color=color,
+                min_python_ver=min_python_ver,
             )
     if command == "update":
         logger.info(f"updated {updatable} package version(s) in {pyproject_path}")
@@ -141,6 +151,7 @@ def update_pyproject_dependencies(
     exclude_packages=None,
     constraint_file: str | None = None,
     color: bool = True,
+    min_python_ver: str | None = None,
 ) -> int:
     """Update given dependency list of a pyproject.toml file."""
     updatable = 0
@@ -164,6 +175,8 @@ def update_pyproject_dependencies(
         if exclude_packages and canonicalize_name(pkg_req.name) in exclude_packages:
             logger.info(f"skip excluded package {pkg_req.name!r}")
             continue
+        min_python_req = get_min_python_version_from_req(pkg_req)
+        min_python = min_python_req if min_python_req else min_python_ver
         try:
             latest_version = get_latest_version(
                 pkg_req.name,
@@ -171,7 +184,7 @@ def update_pyproject_dependencies(
                 exclude_newer_package=exclude_newer_package,
                 constraint_file=constraint_file,
                 python_platform=get_python_platform_from_req(pkg_req),
-                python_version=get_min_python_version_from_req(pkg_req),
+                python_version=min_python,
             )
         except subprocess.CalledProcessError as exc:
             # error getting latest version

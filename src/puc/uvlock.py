@@ -5,6 +5,7 @@
 import subprocess
 import os
 import tomllib
+import re
 from packaging.utils import canonicalize_name
 
 from .logging import logger, colorize_updated_version
@@ -29,6 +30,18 @@ def handle_uv_lock(
     logger.info(f"{command} lock file {uvlock_path}")
     updatable = 0
     project_dir = os.path.abspath(os.path.dirname(uvlock_path))
+    # parse pyproject.toml
+    pyproject_path = os.path.join(project_dir, "pyproject.toml")
+    min_python_ver = None
+    if os.path.isfile(pyproject_path):
+        with open(pyproject_path, "rb") as f:
+            try:
+                pyproject = tomllib.load(f)
+                py_req = pyproject.get("project", {}).get("requires-python")
+                if py_req and re.match(r">=\d+\.\d+$", py_req):
+                    min_python_ver = py_req[2:]
+            except Exception as exc:
+                logger.error(f"error parsing {pyproject_path}: {exc}")
     # parse uv.lock
     with open(uvlock_path, "rb") as f:
         try:
@@ -69,6 +82,7 @@ def handle_uv_lock(
             exclude_newer_package=exclude_newer_package,
             constraint_file=constraint_file,
             color=color,
+            min_python_ver=min_python_ver,
         )
     if command == "update":
         logger.info(f"updated {updatable} package version(s) in {uvlock_path}")
@@ -106,6 +120,7 @@ def update_uvlock_dependency(
     exclude_newer_package: str | None = None,
     constraint_file: str | None = None,
     color: bool = True,
+    min_python_ver: str | None = None,
 ) -> int:
     """Update uv lock dependency."""
     try:
@@ -114,6 +129,7 @@ def update_uvlock_dependency(
             exclude_newer=exclude_newer,
             exclude_newer_package=exclude_newer_package,
             constraint_file=constraint_file,
+            python_version=min_python_ver,
         )
     except subprocess.CalledProcessError as exc:
         # error getting latest version
