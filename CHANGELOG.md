@@ -2,7 +2,7 @@
 
 ## 1.5.0
 
-Release date: xx.xx.2026
+Release date: 29.10.2026
 
 - Parse and use a `requires-python` version found in `pyproject.toml`
 
