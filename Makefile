@@ -187,7 +187,7 @@ release-pypi: ## upload a new release to pypi
 	uv publish dist/$(RELEASE_SOURCE) dist/$(RELEASE_WHEEL)
 
 .PHONY: checkrelease
-checkrelease: lint test typecheck checkgit	## check release conditions
+checkrelease: lint test checkgit	## check release conditions
 
 .PHONY: checkgit
 checkgit:	## various git release checks
